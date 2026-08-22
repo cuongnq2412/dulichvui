@@ -166,6 +166,10 @@
       <button id="btn-open-create-trip" class="btn-glow w-full py-4 text-sm tracking-wide">
         <i data-lucide="plus-circle" class="w-5 h-5"></i> + Tạo chuyến đi mới
       </button>
+
+      <div class="mt-6 text-center text-[11px] text-slate-500 font-medium tracking-wide">
+        <span>Phiên bản v3.0</span> • <span>Bản quyền thuộc về <strong class="text-teal-400 font-bold">Cuong Nguyen Q</strong></span>
+      </div>
     </div>
   </section>
 
@@ -273,6 +277,9 @@
           <button id="exit-admin-btn" class="nav-item admin-only hidden text-amber-400 hover:text-amber-300 mt-auto border-t border-white/10 pt-3">
             <i data-lucide="log-out" class="w-4 h-4"></i> Thoát Quản Trị
           </button>
+          <div class="text-[10px] text-slate-500 font-medium text-center pt-3 border-t border-white/5 mt-auto">
+            v3.0 • © Cuong Nguyen Q
+          </div>
         </aside>
 
         <!-- Main Bento Grid Panels -->
@@ -767,7 +774,9 @@
     });
 
     // --- ADMIN PIN TRIGGER ---
-    function promptAdminPin() {
+    let pendingAction = null;
+    function promptAdminPin(action = null) {
+      pendingAction = action;
       const pinInp = document.getElementById('secret-pin-input');
       const pinModal = document.getElementById('secret-pin-modal');
       if (pinInp && pinModal) {
@@ -776,10 +785,11 @@
         pinInp.focus();
       }
     }
-    document.getElementById('welcome-logo-trigger')?.addEventListener('click', promptAdminPin);
-    document.getElementById('header-logo-trigger')?.addEventListener('click', promptAdminPin);
+    document.getElementById('welcome-logo-trigger')?.addEventListener('click', () => promptAdminPin());
+    document.getElementById('header-logo-trigger')?.addEventListener('click', () => promptAdminPin());
     document.getElementById('close-pin-modal')?.addEventListener('click', () => {
       document.getElementById('secret-pin-modal')?.classList.add('hidden');
+      pendingAction = null;
     });
     document.getElementById('secret-pin-form')?.addEventListener('submit', e => {
       e.preventDefault();
@@ -789,7 +799,12 @@
         document.getElementById('secret-pin-modal')?.classList.add('hidden');
         updateRoleUI();
         toast('Đã mở quyền Quản trị viên!');
-        if (currentTripId) switchTab('trip');
+        if (pendingAction === 'create_trip') {
+          document.getElementById('create-trip-modal')?.classList.remove('hidden');
+          pendingAction = null;
+        } else if (currentTripId) {
+          switchTab('trip');
+        }
       } else {
         toast('Mã PIN không đúng!');
       }
@@ -849,7 +864,7 @@
 
     document.getElementById('btn-open-create-trip')?.addEventListener('click', () => {
       if (!isAdmin) {
-        promptAdminPin();
+        promptAdminPin('create_trip');
         return;
       }
       document.getElementById('create-trip-modal')?.classList.remove('hidden');
