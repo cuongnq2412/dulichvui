@@ -931,6 +931,8 @@
       const container = document.getElementById('member-list-admin');
       if (!container) return;
       const validMembers = members.filter(m => m.TenThanhVien && m.TenThanhVien.trim() !== '');
+      const paidMap = getMemberFundPaidMap();
+
       container.innerHTML = validMembers.map((m, i) => `
         <div class="flex items-center justify-between p-3 rounded-2xl bg-white/[0.03] border border-white/5 text-xs hover:border-white/10 transition">
           <div class="flex items-center gap-3">
@@ -943,7 +945,7 @@
             </div>
           </div>
           <div class="flex items-center gap-2.5">
-            <span class="text-teal-300 font-bold">${formatVND(m.TienQuyDaDong)}</span>
+            <span class="text-teal-300 font-bold" title="Tiền quỹ đã nộp thực tế">${formatVND(paidMap[m.TenThanhVien] || 0)}</span>
             <button onclick="window.removeMember(${i})" class="text-rose-400 hover:text-rose-300 p-1 w-6 h-6 rounded-full hover:bg-rose-500/20 flex items-center justify-center transition">✕</button>
           </div>
         </div>
@@ -960,7 +962,30 @@
       }
     };
 
-    // --- FUND MANAGEMENT (WITH COVER / BAO QUỸ) ---
+    // --- FUND MANAGEMENT & BENEFICIARY RESOLVER ---
+    function getMemberFundPaidMap() {
+      const paidMap = {};
+      const validMembers = members.filter(m => m.TenThanhVien && m.TenThanhVien.trim() !== '');
+      validMembers.forEach(m => { paidMap[m.TenThanhVien] = 0; });
+      
+      funds.forEach(f => {
+        const payer = f.payer_name || f.NguoiNop || '';
+        const bensStr = f.beneficiaries || f.NguoiDuocBao || payer;
+        const bens = bensStr.split(',').map(s => s.trim()).filter(Boolean);
+        const totalAmt = Number(f.amount || f.SoTien || 0);
+        
+        if (bens.length > 0 && totalAmt > 0) {
+          const share = totalAmt / bens.length;
+          bens.forEach(b => {
+            if (paidMap[b] !== undefined) paidMap[b] += share;
+          });
+        } else if (payer && paidMap[payer] !== undefined) {
+          paidMap[payer] += totalAmt;
+        }
+      });
+      return paidMap;
+    }
+
     document.getElementById('fund-form')?.addEventListener('submit', async e => {
       e.preventDefault();
       const payer = document.getElementById('fund-payer-select')?.value;
@@ -969,22 +994,22 @@
       
       if (!payer || !amt) return;
       const targetBeneficiaries = covered.length > 0 ? covered : [payer];
-      const sharePerPerson = amt / targetBeneficiaries.length;
-
-      targetBeneficiaries.forEach(name => {
-        const mem = members.find(m => m.TenThanhVien === name);
-        if (mem) mem.TienQuyDaDong = (Number(mem.TienQuyDaDong) || 0) + sharePerPerson;
-      });
 
       const newFund = {
         payer_name: payer,
+        NguoiNop: payer,
         amount: amt,
+        SoTien: amt,
         beneficiaries: targetBeneficiaries.join(', '),
-        created_at: getGMT7Now()
+        NguoiDuocBao: targetBeneficiaries.join(', '),
+        created_at: getGMT7Now(),
+        ThoiGian: getGMT7Now(),
+        _isLocal: true
       };
       funds.unshift(newFund);
 
       renderFunds();
+      renderMembers();
       renderStats();
       toast(`Đã nạp ${formatVND(amt)} từ ${payer}`);
       const amtInp = document.getElementById('fund-amount-input');
@@ -998,24 +1023,31 @@
         NguoiDuocBao: targetBeneficiaries.join(', '),
         ThoiGian: newFund.created_at
       });
+      newFund._isLocal = false;
     });
 
     function renderFunds() {
-      const total = funds.reduce((sum, f) => sum + (Number(f.amount) || 0), 0);
+      const total = funds.reduce((sum, f) => sum + (Number(f.amount || f.SoTien) || 0), 0);
       const totalDisp = document.getElementById('fund-total-display');
       if (totalDisp) totalDisp.textContent = formatVND(total);
       const hist = document.getElementById('fund-history-list');
       if (hist) {
-        hist.innerHTML = funds.map(f => `
-          <div class="flex justify-between items-center p-3 rounded-2xl bg-white/[0.03] border border-white/5 text-xs hover:border-white/10 transition">
-            <div>
-              <span class="font-bold text-white text-sm">${f.payer_name}</span>
-              <div class="text-[11px] text-teal-400 font-medium">Đóng cho: ${f.beneficiaries || f.payer_name}</div>
-              <div class="text-[10px] text-slate-500">${f.created_at}</div>
+        hist.innerHTML = funds.map(f => {
+          const payer = f.payer_name || f.NguoiNop || 'Thành viên';
+          const amt = Number(f.amount || f.SoTien || 0);
+          const bens = f.beneficiaries || f.NguoiDuocBao || payer;
+          const time = f.created_at || f.ThoiGian || f.ThoiGianTao || '';
+          return `
+            <div class="flex justify-between items-center p-3.5 rounded-2xl bg-white/[0.03] border border-white/5 text-xs hover:border-teal-400/30 transition">
+              <div>
+                <span class="font-bold text-white text-sm">${payer}</span>
+                <div class="text-[11px] text-teal-400 font-medium mt-0.5">Đóng cho: ${bens}</div>
+                <div class="text-[10px] text-slate-500 mt-0.5">${time}</div>
+              </div>
+              <span class="text-teal-400 font-black text-sm md:text-base">+${formatVND(amt)}</span>
             </div>
-            <span class="text-teal-400 font-black text-sm">+${formatVND(f.amount)}</span>
-          </div>
-        `).join('') || '<div class="text-xs text-slate-500 text-center py-6">Chưa có lượt nạp quỹ nào</div>';
+          `;
+        }).join('') || '<div class="text-xs text-slate-500 text-center py-6">Chưa có lượt nạp quỹ nào</div>';
       }
     }
 
@@ -1031,22 +1063,30 @@
       if (mode === 'Chỉ định số tiền') renderCustomSplitRows();
     });
 
-    function renderParticipantChips() {
+    function renderParticipantChips(force = false) {
       const container = document.getElementById('participant-chips-container');
       const fundCoverContainer = document.getElementById('fund-cover-chips');
       const sponsorBenContainer = document.getElementById('sponsor-beneficiaries-chips');
       const validMembers = members.filter(m => m.TenThanhVien && m.TenThanhVien.trim() !== '');
 
-      const makeChips = (isDefaultSelected) => validMembers.map((m, i) => `
-        <div class="chip ${isDefaultSelected ? 'selected' : ''}" data-name="${m.TenThanhVien}">
-          <div class="avatar-mini bg-gradient-to-br ${avatarGradients[i % avatarGradients.length]}">${getAvatarInitials(m.TenThanhVien)}</div>
-          <span>${m.TenThanhVien}</span>
-        </div>
-      `).join('');
+      // Bảo toàn trạng thái chip người dùng đang chọn trước đó
+      const selectedParts = new Set([...(container?.querySelectorAll('.chip.selected') || [])].map(c => c.dataset.name));
+      const selectedFundCovers = new Set([...(fundCoverContainer?.querySelectorAll('.chip.selected') || [])].map(c => c.dataset.name));
+      const selectedSponsorBens = new Set([...(sponsorBenContainer?.querySelectorAll('.chip.selected') || [])].map(c => c.dataset.name));
 
-      if (container) container.innerHTML = makeChips(true);
-      if (fundCoverContainer) fundCoverContainer.innerHTML = makeChips(true);
-      if (sponsorBenContainer) sponsorBenContainer.innerHTML = makeChips(false);
+      const makeChips = (selectedSet, isInitialDefault) => validMembers.map((m, i) => {
+        const isSelected = selectedSet.size > 0 ? selectedSet.has(m.TenThanhVien) : isInitialDefault;
+        return `
+          <div class="chip ${isSelected ? 'selected' : ''}" data-name="${m.TenThanhVien}">
+            <div class="avatar-mini bg-gradient-to-br ${avatarGradients[i % avatarGradients.length]}">${getAvatarInitials(m.TenThanhVien)}</div>
+            <span>${m.TenThanhVien}</span>
+          </div>
+        `;
+      }).join('');
+
+      if (container) container.innerHTML = makeChips(selectedParts, true);
+      if (fundCoverContainer) fundCoverContainer.innerHTML = makeChips(selectedFundCovers, true);
+      if (sponsorBenContainer) sponsorBenContainer.innerHTML = makeChips(selectedSponsorBens, false);
 
       document.querySelectorAll('.chip').forEach(chip => {
         chip.addEventListener('click', () => {
@@ -1190,7 +1230,8 @@
         LinkHoaDon: receiptBase64,
         NguoiBao: sponsorPayer,
         NguoiDuocBao: sponsorBeneficiaries.join(', '),
-        ThoiGianTao: getGMT7Now()
+        ThoiGianTao: getGMT7Now(),
+        _isLocal: true
       };
 
       expenses = expenses.filter(x => x.MaGiaoDich !== expObj.MaGiaoDich);
@@ -1209,6 +1250,7 @@
       document.getElementById('sponsor-container')?.classList.add('hidden');
 
       const res = await apiCall('POST', { action: 'addExpense', expense: expObj, imageBase64: expObj.LinkHoaDon || undefined });
+      expObj._isLocal = false;
       if (res && res.LinkHoaDon) {
         expObj.LinkHoaDon = res.LinkHoaDon;
         renderExpenses();
@@ -1274,7 +1316,8 @@
     function calculateBalances() {
       const bal = {};
       const validMembers = members.filter(m => m.TenThanhVien && m.TenThanhVien.trim() !== '');
-      validMembers.forEach(m => { bal[m.TenThanhVien] = Number(m.TienQuyDaDong) || 0; });
+      const paidMap = getMemberFundPaidMap();
+      validMembers.forEach(m => { bal[m.TenThanhVien] = paidMap[m.TenThanhVien] || 0; });
 
       expenses.forEach(e => {
         const parts = (e.NguoiThamGia || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -1519,21 +1562,43 @@
       }
     });
 
-    // --- RE-RENDER & SELECTS SYNC ---
-    function updateDynamicSelects() {
+    // --- RE-RENDER & SELECTS SYNC (NON-DESTRUCTIVE & SMART DIFF) ---
+    let lastMemberSignature = '';
+
+    function updateDynamicSelects(force = false) {
       const validMembers = members.filter(m => m.TenThanhVien && m.TenThanhVien.trim() !== '');
-      const opts = validMembers.map(m => `<option value="${m.TenThanhVien}">${m.TenThanhVien}</option>`).join('');
+      const currentSignature = validMembers.map(m => `${m.MaThanhVien}_${m.TenThanhVien}`).join('|');
+      
+      // Nếu danh sách thành viên không thay đổi, KHÔNG BAO GIỜ can thiệp vào form người dùng đang nhập!
+      if (!force && currentSignature === lastMemberSignature) return;
+      lastMemberSignature = currentSignature;
+
       const fPayer = document.getElementById('fund-payer-select');
       const ePayer = document.getElementById('exp-payer');
       const sPayer = document.getElementById('sponsor-payer-select');
-      if (fPayer) fPayer.innerHTML = '<option value="">-- Chọn thành viên --</option>' + opts;
-      if (ePayer) ePayer.innerHTML = '<option value="">-- Chọn người ứng trước --</option>' + opts;
-      if (sPayer) sPayer.innerHTML = '<option value="">-- Chọn người bao --</option>' + opts;
-      renderParticipantChips();
+
+      // Giữ nguyên giá trị người dùng đang chọn
+      const currentFPayer = fPayer?.value || '';
+      const currentEPayer = ePayer?.value || '';
+      const currentSPayer = sPayer?.value || '';
+
+      const opts = validMembers.map(m => `<option value="${m.TenThanhVien}">${m.TenThanhVien}</option>`).join('');
+      if (fPayer) {
+        fPayer.innerHTML = '<option value="">-- Chọn thành viên --</option>' + opts;
+        if (currentFPayer) fPayer.value = currentFPayer;
+      }
+      if (ePayer) {
+        ePayer.innerHTML = '<option value="">-- Chọn người ứng trước --</option>' + opts;
+        if (currentEPayer) ePayer.value = currentEPayer;
+      }
+      if (sPayer) {
+        sPayer.innerHTML = '<option value="">-- Chọn người bao --</option>' + opts;
+        if (currentSPayer) sPayer.value = currentSPayer;
+      }
+      renderParticipantChips(force);
     }
 
     function renderAll(force = false) {
-      if (isUserTyping && !force) return;
       if (currentTrip) {
         const nameEl = document.getElementById('header-trip-name');
         const metaEl = document.getElementById('header-trip-meta');
@@ -1555,7 +1620,7 @@
       renderFunds();
       renderExpenses();
       renderStats();
-      updateDynamicSelects();
+      updateDynamicSelects(force);
       lucide.createIcons();
     }
 
@@ -1574,9 +1639,21 @@
       if (data && !data.error) {
         if (data.trip) currentTrip = data.trip;
         if (data.members) members = data.members;
-        if (data.funds) funds = data.funds;
+        
+        // Merge thông minh Quỹ (Giữ lại khoản nạp vừa bấm lưu chưa kịp lên Google Sheets)
+        if (data.funds) {
+          const serverFunds = data.funds;
+          const serverSignatures = new Set(serverFunds.map(f => `${f.payer_name}_${f.amount}_${f.created_at}`));
+          const pendingFunds = funds.filter(f => f._isLocal && !serverSignatures.has(`${f.payer_name}_${f.amount}_${f.created_at}`));
+          funds = [...pendingFunds, ...serverFunds];
+        }
+
+        // Merge thông minh Chi tiêu (Giữ lại khoản chi vừa bấm lưu chưa kịp lên Google Sheets)
         if (data.expenses) {
-          expenses = data.expenses;
+          const serverExpenses = data.expenses;
+          const serverIds = new Set(serverExpenses.map(e => e.MaGiaoDich || (e.MoTa + '_' + e.SoTien + '_' + e.ThoiGianTao)));
+          const pendingExpenses = expenses.filter(e => e._isLocal && !serverIds.has(e.MaGiaoDich || (e.MoTa + '_' + e.SoTien + '_' + e.ThoiGianTao)));
+          expenses = [...pendingExpenses, ...serverExpenses];
         }
         renderAll();
       }
