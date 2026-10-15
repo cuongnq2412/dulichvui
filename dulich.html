@@ -1,0 +1,1685 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Du Lịch Vui - Quản Lý Thu Chi Đội Nhóm</title>
+  
+  <!-- PWA & Mobile Meta Tags -->
+  <meta name="theme-color" content="#070b14">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Du Lịch Vui">
+  <link rel="icon" type="image/png" href="https://sv2.anhsieuviet.com/2026/08/23/baohiemdulichtrongnuoc.png">
+  <link rel="apple-touch-icon" href="https://sv2.anhsieuviet.com/2026/08/23/baohiemdulichtrongnuoc.png">
+
+  <!-- Tailwind CSS, Lucide Icons, Chart.js, Fonts -->
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    * { font-family: 'Plus Jakarta Sans', 'Be Vietnam Pro', sans-serif; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance: textfield; }
+
+    /* Ultra Luxury Aurora Glow Background */
+    .aurora-bg { position: fixed; inset: 0; z-index: -1; background: #060913; overflow: hidden; }
+    .aurora-bg::before, .aurora-bg::after { content: ''; position: absolute; border-radius: 50%; filter: blur(150px); opacity: 0.4; animation: auroraFlow 16s ease-in-out infinite alternate; }
+    .aurora-bg::before { width: 700px; height: 700px; top: -200px; left: -150px; background: radial-gradient(circle, #0d9488 0%, #1e40af 60%, transparent 100%); }
+    .aurora-bg::after { width: 600px; height: 600px; bottom: -150px; right: -100px; background: radial-gradient(circle, #7e22ce 0%, #db2777 60%, transparent 100%); animation-delay: -8s; }
+    @keyframes auroraFlow { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(70px, 40px) scale(1.18); } }
+
+    /* Bento Grid Glass Cards */
+    .bento-card { 
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.015) 100%);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 24px;
+      box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.5);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .bento-card:hover {
+      border-color: rgba(94, 234, 212, 0.25);
+      box-shadow: 0 20px 48px -12px rgba(13, 148, 136, 0.15);
+    }
+
+    .input-glass { 
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px; padding: 11px 16px;
+      width: 100%; color: #f8fafc; outline: none;
+      transition: all 0.2s;
+    }
+    .input-glass:focus { 
+      border-color: #14b8a6; 
+      background: rgba(15, 23, 42, 0.85);
+      box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.25); 
+    }
+    .input-glass::placeholder { color: rgba(148, 163, 184, 0.45); }
+
+    select.input-glass { 
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%235eead4' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 16px center; padding-right: 42px;
+    }
+    select.input-glass option { background: #0b1120; color: #f8fafc; padding: 12px; }
+
+    /* Modern Avatar Chips */
+    .chip { 
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 14px 6px 8px; border-radius: 9999px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.04);
+      color: #94a3b8; font-size: 13px; cursor: pointer; user-select: none;
+      transition: all 0.2s;
+    }
+    .chip .avatar-mini {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: linear-gradient(135deg, #0d9488, #2563eb);
+      color: white; font-size: 10px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .chip.selected { 
+      background: rgba(20, 184, 166, 0.18);
+      border-color: #14b8a6; color: #5eead4; font-weight: 600;
+      box-shadow: 0 0 15px rgba(20, 184, 166, 0.2);
+    }
+
+    /* Glow Buttons */
+    .btn-glow { 
+      background: linear-gradient(135deg, #0d9488 0%, #06b6d4 100%);
+      color: #fff; border-radius: 14px; padding: 11px 22px;
+      font-weight: 700; transition: all 0.2s; border: none; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      box-shadow: 0 4px 18px rgba(13, 148, 136, 0.35);
+    }
+    .btn-glow:hover { box-shadow: 0 0 26px rgba(13, 148, 136, 0.6); filter: brightness(1.08); transform: translateY(-1px); }
+    .btn-glow:active { transform: scale(0.98); }
+    .btn-glow:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    /* Navigation */
+    .panel { display: none; }
+    .panel.active { display: block; animation: panelIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+    @keyframes panelIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .nav-item { 
+      cursor: pointer; padding: 12px 18px; border-radius: 16px;
+      display: flex; align-items: center; gap: 14px;
+      color: rgba(255, 255, 255, 0.65); transition: all 0.2s;
+      font-size: 14px; font-weight: 600;
+    }
+    .nav-item:hover { background: rgba(255, 255, 255, 0.06); color: #fff; }
+    .nav-item.active { 
+      background: linear-gradient(135deg, rgba(20, 184, 166, 0.2) 0%, rgba(6, 182, 212, 0.1) 100%);
+      border: 1px solid rgba(20, 184, 166, 0.35);
+      color: #5eead4;
+    }
+
+    /* Badges & Sync LED */
+    .badge-glass { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 999px; font-size: 11px; font-weight: 700; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); }
+    .sync-status { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.2s; }
+    .sync-dot { width: 9px; height: 9px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 10px #22c55e; transition: all 0.3s; }
+    .sync-status.syncing .sync-dot { background: #eab308; box-shadow: 0 0 12px #eab308; animation: pulseDot 0.8s infinite; }
+    .sync-status.offline .sync-dot { background: #ef4444; box-shadow: 0 0 10px #ef4444; }
+    @keyframes pulseDot { 50% { opacity: 0.3; transform: scale(1.2); } }
+
+    .toast { position: fixed; bottom: 85px; right: 20px; background: rgba(11, 17, 32, 0.98); backdrop-filter: blur(16px); color: #f8fafc; padding: 14px 22px; border-radius: 16px; border: 1px solid rgba(20, 184, 166, 0.3); z-index: 99999; box-shadow: 0 16px 36px rgba(0,0,0,0.6); animation: toastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+    @keyframes toastIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 10px; }
+  </style>
+</head>
+<body class="w-full min-h-screen text-slate-200 overflow-x-hidden bg-slate-950">
+
+  <div class="aurora-bg"></div>
+
+  <!-- 1. WELCOME SCREEN (CHỌN CHUYẾN ĐI) -->
+  <section id="welcome-screen" class="min-h-screen w-full flex items-center justify-center p-4 md:p-6">
+    <div class="bento-card w-full max-w-xl p-7 md:p-9 border border-teal-500/20">
+      <div class="flex items-center gap-4 mb-7">
+        <div id="welcome-logo-trigger" class="w-14 h-14 rounded-2xl bg-gradient-to-br from-teal-400 via-cyan-500 to-blue-600 flex items-center justify-center cursor-pointer shadow-xl hover:scale-105 transition" title="Nhấp mở Quản trị viên (PIN 032)">
+          <i data-lucide="plane" class="text-white w-7 h-7"></i>
+        </div>
+        <div>
+          <span class="text-xs uppercase tracking-widest text-teal-400 font-extrabold flex items-center gap-1.5">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Du Lịch Cùng Nhau
+          </span>
+          <h1 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight mt-0.5">Quản Lý Chi Phí Chuyến Đi</h1>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between mb-3.5">
+        <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Chuyến đi của bạn</h2>
+        <span id="trip-count" class="text-xs text-teal-400 font-bold bg-teal-500/10 px-2.5 py-1 rounded-full border border-teal-500/20"></span>
+      </div>
+
+      <div id="active-trip-list" class="space-y-3 mb-6 max-h-80 overflow-y-auto pr-1"></div>
+      <div id="no-active-trips" class="hidden text-center py-10 border border-dashed border-slate-700/80 rounded-2xl text-slate-400 text-sm mb-4">
+        Chưa có chuyến đi nào. Hãy tạo chuyến đi mới!
+      </div>
+
+      <button id="btn-open-create-trip" class="btn-glow w-full py-4 text-sm tracking-wide">
+        <i data-lucide="plus-circle" class="w-5 h-5"></i> + Tạo chuyến đi mới
+      </button>
+
+      <div class="mt-6 text-center text-[11px] text-slate-500 font-medium tracking-wide">
+        <span>Phiên bản v3.0</span> • <span>Bản quyền thuộc về <strong class="text-teal-400 font-bold">Cuong Nguyen Q</strong></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ADMIN PIN MODAL -->
+  <div id="secret-pin-modal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="bento-card w-full max-w-xs p-6 relative border border-amber-500/30">
+      <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center mb-3.5 shadow-inner">
+        <i data-lucide="shield-check" class="w-7 h-7"></i>
+      </div>
+      <h3 class="text-lg font-bold text-white mb-1">Xác Thực Quản Trị</h3>
+      <p class="text-xs text-slate-400 mb-4">Nhập mã PIN để mở khóa cấu hình, thu quỹ và quyết toán.</p>
+      <form id="secret-pin-form" class="space-y-3.5">
+        <input id="secret-pin-input" type="password" maxlength="6" class="input-glass text-center tracking-widest text-2xl font-black text-teal-300" placeholder="Mã PIN" autocomplete="off" required>
+        <div class="flex gap-2">
+          <button type="button" id="close-pin-modal" class="w-1/2 py-2.5 text-xs font-semibold text-slate-400 hover:text-white rounded-xl">Đóng</button>
+          <button type="submit" class="btn-glow w-1/2 text-xs py-2.5">Xác nhận</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- CREATE TRIP MODAL -->
+  <div id="create-trip-modal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="bento-card w-full max-w-lg p-6 md:p-8 max-h-[90vh] overflow-y-auto border border-teal-500/30">
+      <div class="flex items-center justify-between mb-5">
+        <h3 class="text-lg font-extrabold text-white flex items-center gap-2.5"><i data-lucide="map-pin" class="text-teal-400 w-5 h-5"></i> Tạo Chuyến Đi Mới</h3>
+        <button type="button" id="close-create-trip" class="text-slate-400 hover:text-white w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">✕</button>
+      </div>
+      <form id="welcome-trip-form" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-400 mb-1.5">Tên chuyến đi *</label>
+          <input id="new-trip-name" class="input-glass" placeholder="VD: Khám Phá Đà Lạt 2026" required>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-400 mb-1.5">Điểm đến</label>
+          <input id="new-trip-dest" class="input-glass" placeholder="VD: Đà Lạt, Lâm Đồng">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-400 mb-1.5">Ngày bắt đầu</label>
+            <input id="new-trip-start" type="date" class="input-glass">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-400 mb-1.5">Ngày kết thúc</label>
+            <input id="new-trip-end" type="date" class="input-glass">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-400 mb-1.5">Ngân sách dự kiến (VND)</label>
+          <input id="new-trip-budget" class="input-glass currency-input font-bold text-teal-300" placeholder="0">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-400 mb-1.5">Thành viên tham gia ban đầu (cách nhau bởi dấu phẩy)</label>
+          <input id="new-trip-members" class="input-glass" placeholder="Chị Thương, Hồng Pháp, Cường Mập, Bull, Bí">
+        </div>
+        <button type="submit" class="btn-glow w-full mt-4 py-3.5 text-sm">Khởi Tạo & Bắt Đầu Chuyến Đi</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. MAIN APP SHELL (BENTO GRID LAYOUT) -->
+  <div id="app-shell" class="hidden min-h-screen pb-24 md:pb-8 pt-3">
+    <div class="max-w-7xl mx-auto px-3 md:px-6">
+
+      <!-- Header Bar (Gióng hàng thẳng tắp với Sidebar và Thẻ nội dung) -->
+      <header class="bento-card px-4 md:px-6 py-3.5 mb-5 shadow-2xl">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div class="flex items-center gap-3.5">
+            <div id="header-logo-trigger" class="w-11 h-11 rounded-2xl bg-gradient-to-br from-teal-400 via-cyan-500 to-blue-600 flex items-center justify-center cursor-pointer shadow-lg hover:scale-105 transition" title="Nhấp mở Quản trị viên (PIN 032)">
+              <i data-lucide="plane" class="text-white w-6 h-6"></i>
+            </div>
+            <div>
+              <h2 id="header-trip-name" class="font-extrabold text-white text-lg md:text-xl tracking-tight truncate">Chuyến đi</h2>
+              <div id="header-trip-meta" class="text-xs text-slate-400 font-medium">--/--/----</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2.5">
+            <!-- Đèn tín hiệu đồng bộ gọn gàng (Không chữ) -->
+            <div id="sync-status" class="sync-status" title="Đã kết nối trực tiếp">
+              <span class="sync-dot"></span>
+            </div>
+            <button id="btn-switch-trip" class="text-xs font-bold text-teal-300 border border-teal-500/30 bg-teal-500/10 px-3.5 py-2 rounded-xl hover:bg-teal-500/20 transition flex items-center gap-1.5">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Đổi chuyến đi
+            </button>
+            <span id="badge-trip-status" class="badge-glass text-emerald-400 border-emerald-500/30 bg-emerald-500/10">Đang đi</span>
+            <span id="badge-role" class="badge-glass text-slate-300 border-white/10">Thành viên</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content Bento Container -->
+      <div class="flex gap-6">
+        <!-- Desktop Sidebar Navigation -->
+        <aside class="hidden md:flex flex-col bento-card w-64 p-4 h-[calc(100vh-120px)] sticky top-24 shrink-0">
+          <div class="flex items-center gap-2 px-3 py-2 mb-3 border-b border-white/10">
+            <span class="text-[11px] uppercase font-black tracking-widest text-teal-400">Danh Mục Chính</span>
+          </div>
+          <nav class="space-y-2 flex-1" id="sidebar-nav">
+            <div class="nav-item admin-only hidden" data-tab="trip"><i data-lucide="settings" class="w-4 h-4 text-teal-400"></i> Cài đặt chuyến</div>
+            <div class="nav-item admin-only hidden" data-tab="fund"><i data-lucide="wallet" class="w-4 h-4 text-cyan-400"></i> Thu quỹ</div>
+            <div class="nav-item active" data-tab="expense"><i data-lucide="receipt" class="w-4 h-4 text-emerald-400"></i> Chi tiêu</div>
+            <div class="nav-item" data-tab="stats"><i data-lucide="pie-chart" class="w-4 h-4 text-purple-400"></i> Thống kê</div>
+            <div class="nav-item admin-only hidden" data-tab="settle"><i data-lucide="check-circle-2" class="w-4 h-4 text-rose-400"></i> Quyết toán</div>
+          </nav>
+          <button id="exit-admin-btn" class="nav-item admin-only hidden text-amber-400 hover:text-amber-300 mt-auto border-t border-white/10 pt-3">
+            <i data-lucide="log-out" class="w-4 h-4"></i> Thoát Quản Trị
+          </button>
+          <div class="text-[10px] text-slate-500 font-medium text-center pt-3 border-t border-white/5 mt-auto">
+            v3.0 • © Cuong Nguyen Q
+          </div>
+        </aside>
+
+        <!-- Main Bento Grid Panels -->
+        <main class="flex-1 w-full max-w-full min-w-0">
+
+          <!-- TAB 1: CÀI ĐẶT CHUYẾN ĐI (ADMIN) -->
+          <div class="panel" id="panel-trip">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+              <div class="bento-card p-6">
+                <h3 class="font-extrabold text-white mb-4 text-sm uppercase tracking-wider flex items-center gap-2"><i data-lucide="users" class="text-teal-400 w-4 h-4"></i> Quản Lý Thành Viên</h3>
+                <form id="member-form" class="space-y-3 mb-5">
+                  <div class="grid grid-cols-2 gap-2.5">
+                    <input id="m-name" class="input-glass text-xs" placeholder="Tên thành viên *" required>
+                    <select id="m-role" class="input-glass text-xs">
+                      <option value="Thành viên">Thành viên</option>
+                      <option value="Trưởng nhóm">Trưởng nhóm</option>
+                    </select>
+                  </div>
+                  <div class="grid grid-cols-2 gap-2.5">
+                    <input id="m-bank-acc" class="input-glass text-xs" placeholder="Số tài khoản">
+                    <select id="m-bank-select" class="input-glass text-xs"></select>
+                  </div>
+                  <button type="submit" class="btn-glow w-full text-xs py-3">+ Thêm Thành Viên</button>
+                </form>
+                <div id="member-list-admin" class="space-y-2.5 max-h-96 overflow-y-auto pr-1"></div>
+              </div>
+
+              <div class="bento-card p-6">
+                <h3 class="font-extrabold text-white mb-4 text-sm uppercase tracking-wider flex items-center gap-2"><i data-lucide="info" class="text-teal-400 w-4 h-4"></i> Thông Tin Chuyến Đi</h3>
+                <div id="trip-overview-box" class="space-y-3 text-sm text-slate-300"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 2: THU QUỸ & BAO QUỸ (ADMIN) -->
+          <div class="panel" id="panel-fund">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+              <div class="bento-card p-6">
+                <h3 class="font-extrabold text-white mb-1 text-sm uppercase tracking-wider flex items-center gap-2"><i data-lucide="wallet" class="text-cyan-400 w-4 h-4"></i> Nạp Quỹ & Bao Quỹ</h3>
+                <p class="text-xs text-slate-400 mb-4">1 người có thể nộp quỹ bao trọn gói cho nhiều thành viên.</p>
+                <div class="p-4 rounded-2xl bg-teal-500/10 border border-teal-500/20 mb-4">
+                  <div class="text-xs text-slate-400 font-medium">Tổng tiền quỹ đã thu</div>
+                  <div id="fund-total-display" class="text-3xl font-black text-teal-400 mt-1">0 VND</div>
+                </div>
+                <form id="fund-form" class="space-y-4">
+                  <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1.5">Người chuyển tiền *</label>
+                    <select id="fund-payer-select" class="input-glass text-sm" required></select>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1.5">Số tiền (VND) *</label>
+                    <input id="fund-amount-input" class="input-glass currency-input text-base font-bold text-teal-300" placeholder="0" required>
+                  </div>
+                  <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                      <label class="block text-xs font-bold text-slate-400">Khoản tiền này nộp bao cho ai?</label>
+                      <span class="text-[11px] text-teal-400 font-semibold">(Tự chia đều phần nộp)</span>
+                    </div>
+                    <div id="fund-cover-chips" class="flex flex-wrap gap-2 py-1"></div>
+                  </div>
+                  <button type="submit" class="btn-glow w-full py-3.5">Xác Nhận Nạp Quỹ</button>
+                </form>
+              </div>
+
+              <div class="bento-card p-6">
+                <h3 class="font-extrabold text-white mb-4 text-sm uppercase tracking-wider flex items-center gap-2"><i data-lucide="history" class="text-cyan-400 w-4 h-4"></i> Lịch Sử Thu Quỹ</h3>
+                <div id="fund-history-list" class="space-y-2.5 max-h-[480px] overflow-y-auto pr-1"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 3: CHI TIÊU (MEMBER & PUBLIC) -->
+          <div class="panel active" id="panel-expense">
+            <div class="bento-card p-6 mb-5">
+              <h3 class="font-extrabold text-white mb-4 text-sm uppercase tracking-wider flex items-center gap-2"><i data-lucide="plus-circle" class="text-emerald-400 w-4 h-4"></i> Thêm Khoản Chi Tiêu Mới</h3>
+              <form id="expense-form" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                  <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1.5">Mô tả khoản chi *</label>
+                    <input id="exp-desc" class="input-glass" placeholder="VD: Ăn trưa bún bò, Vé xe, Khách sạn..." required>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1.5">Số tiền (VND) *</label>
+                    <input id="exp-amount" class="input-glass currency-input font-black text-rose-400 text-base" placeholder="0" required>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                  <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1.5">Danh mục</label>
+                    <select id="exp-category" class="input-glass">
+                      <option value="Ăn uống">🍲 Ăn uống</option>
+                      <option value="Di chuyển">🚗 Di chuyển</option>
+                      <option value="Lưu trú">🏨 Lưu trú</option>
+                      <option value="Vé tham quan">🎟️ Vé tham quan</option>
+                      <option value="Phát sinh">✨ Phát sinh</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1.5">Nguồn tiền</label>
+                    <select id="exp-source" class="input-glass">
+                      <option value="Quỹ chung">Quỹ chung</option>
+                      <option value="Cá nhân ứng trước">Cá nhân ứng trước</option>
+                    </select>
+                  </div>
+                  <div id="payer-field-wrapper" class="hidden">
+                    <label class="block text-xs font-bold text-slate-400 mb-1.5">Người ứng trước *</label>
+                    <select id="exp-payer" class="input-glass"></select>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="flex items-center justify-between mb-2">
+                    <label class="block text-xs font-bold text-slate-400">Người cùng chia tiền</label>
+                    <div class="flex gap-3">
+                      <button type="button" id="btn-select-all-parts" class="text-[11px] font-bold text-teal-400 hover:underline">Chọn tất cả</button>
+                      <button type="button" id="btn-clear-all-parts" class="text-[11px] font-bold text-slate-400 hover:underline">Bỏ chọn</button>
+                    </div>
+                  </div>
+                  <div id="participant-chips-container" class="flex flex-wrap gap-2.5 py-1"></div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 items-end">
+                  <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1.5">Cách chia tiền</label>
+                    <select id="exp-split-mode" class="input-glass">
+                      <option value="Chia đều">Chia đều</option>
+                      <option value="Chỉ định số tiền">Chỉ định số tiền</option>
+                      <option value="Có người bao">🎁 Có người bao (Mời chầu này)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1.5">Hóa đơn (Chọn ảnh / Dán Ctrl+V)</label>
+                    <input type="file" id="receipt-input" accept="image/*" class="hidden">
+                    <div id="receipt-dropzone" class="input-glass cursor-pointer flex items-center justify-between text-xs py-3 border-dashed border-teal-500/40 hover:border-teal-400 transition">
+                      <span id="receipt-name" class="truncate text-slate-300 font-medium">📎 Chọn ảnh hoặc dán Ctrl+V</span>
+                      <button type="button" id="receipt-clear-btn" class="hidden text-rose-400 hover:text-rose-300 ml-2 font-bold">✕</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Sponsor Box (Có người bao) -->
+                <div id="sponsor-container" class="hidden p-4 rounded-2xl bg-teal-500/10 border border-teal-500/30 space-y-3">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                    <div>
+                      <label class="block text-xs font-bold text-teal-300 mb-1.5">Ai là người đứng ra bao? *</label>
+                      <select id="sponsor-payer-select" class="input-glass"></select>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-bold text-teal-300 mb-1.5">Bao cho những ai?</label>
+                      <div id="sponsor-beneficiaries-chips" class="flex flex-wrap gap-2 py-1"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Custom Split Inputs -->
+                <div id="custom-split-container" class="hidden p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-2.5">
+                  <div class="text-xs text-slate-400 mb-2 font-semibold">Nhập số tiền cụ thể cho từng người:</div>
+                  <div id="custom-split-rows" class="space-y-2"></div>
+                  <div id="custom-split-total-alert" class="text-xs text-right pt-2 border-t border-white/10"></div>
+                </div>
+
+                <button type="submit" id="btn-submit-expense" class="btn-glow w-full py-4 text-sm font-bold">
+                  <i data-lucide="plus" class="w-5 h-5"></i> Lưu Khoản Chi Tiêu
+                </button>
+              </form>
+            </div>
+
+            <div class="bento-card p-6">
+              <h3 class="font-extrabold text-white mb-4 text-sm uppercase tracking-wider flex items-center gap-2"><i data-lucide="list-ordered" class="text-emerald-400 w-4 h-4"></i> Lịch Sử Chi Tiêu Gần Đây</h3>
+              <div id="expense-history-list" class="space-y-3 max-h-[500px] overflow-y-auto pr-1"></div>
+            </div>
+          </div>
+
+          <!-- TAB 4: THỐNG KÊ (MEMBER & PUBLIC) -->
+          <div class="panel" id="panel-stats">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
+              <div class="bento-card p-5 text-center">
+                <div class="text-xs text-slate-400 font-bold uppercase tracking-wider">Tổng Thu Quỹ</div>
+                <div id="stat-total-fund" class="text-2xl md:text-3xl font-black text-teal-400 mt-1.5">0 VND</div>
+              </div>
+              <div class="bento-card p-5 text-center">
+                <div class="text-xs text-slate-400 font-bold uppercase tracking-wider">Tổng Chi Tiêu</div>
+                <div id="stat-total-expense" class="text-2xl md:text-3xl font-black text-rose-400 mt-1.5">0 VND</div>
+              </div>
+              <div class="bento-card p-5 text-center">
+                <div class="text-xs text-slate-400 font-bold uppercase tracking-wider">Số Dư Quỹ Còn Lại</div>
+                <div id="stat-fund-balance" class="text-2xl md:text-3xl font-black text-white mt-1.5">0 VND</div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+              <div class="bento-card p-6">
+                <h3 class="font-extrabold text-white mb-4 text-sm uppercase tracking-wider flex items-center gap-2"><i data-lucide="pie-chart" class="text-purple-400 w-4 h-4"></i> Chi Tiêu Theo Danh Mục</h3>
+                <div class="max-w-[260px] mx-auto mb-4">
+                  <canvas id="category-chart"></canvas>
+                </div>
+                <div id="category-breakdown-list" class="space-y-2 text-xs"></div>
+              </div>
+              <div class="bento-card p-6">
+                <h3 class="font-extrabold text-white mb-4 text-sm uppercase tracking-wider flex items-center gap-2"><i data-lucide="scale" class="text-purple-400 w-4 h-4"></i> Bảng Công Nợ Thành Viên</h3>
+                <div id="member-debt-table" class="overflow-x-auto"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 5: QUYẾT TOÁN & VIETQR (ADMIN) -->
+          <div class="panel" id="panel-settle">
+            <div class="bento-card p-6 mb-5">
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+                <div>
+                  <h3 class="font-extrabold text-white text-base flex items-center gap-2"><i data-lucide="check-circle-2" class="text-rose-400 w-5 h-5"></i> Quyết Toán Cuối Chuyến</h3>
+                  <p class="text-xs text-slate-400 mt-0.5">Tự động cân bằng công nợ đôi & Tạo mã VietQR chuyển khoản tức thì.</p>
+                </div>
+                <button id="btn-copy-zalo" class="btn-glow text-xs py-2.5 px-4 bg-gradient-to-r from-blue-600 to-cyan-600">
+                  📋 Sao chép bảng tổng kết gửi Zalo
+                </button>
+              </div>
+
+              <!-- Settlement List -->
+              <div class="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-3">Giao dịch thanh toán tối ưu:</div>
+              <div id="settlement-plan-list" class="space-y-3 mb-5"></div>
+
+              <!-- Leftover Fund Refund Section -->
+              <div id="fund-refund-box" class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 text-xs hidden">
+                <div class="font-extrabold text-emerald-400 mb-1 flex items-center gap-1.5"><i data-lucide="coins" class="w-4 h-4"></i> Hoàn trả quỹ chung còn dư:</div>
+                <div id="fund-refund-list" class="space-y-1 text-slate-300"></div>
+              </div>
+            </div>
+
+            <div class="bento-card p-6 flex items-center justify-between">
+              <div>
+                <h4 class="font-extrabold text-white text-sm">Khóa Sổ Chuyến Đi</h4>
+                <p class="text-xs text-slate-400">Đóng chuyến đi và chuyển sang trạng thái Đã quyết toán.</p>
+              </div>
+              <button id="btn-lock-trip" class="px-5 py-3 rounded-xl bg-rose-500/80 hover:bg-rose-500 text-white text-xs font-bold shadow-lg transition">
+                🔒 Khóa Sổ
+              </button>
+            </div>
+          </div>
+
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Bottom Navigation -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-50 bento-card rounded-t-3xl border-t border-white/10 px-2 py-2.5 flex items-center justify-around shadow-2xl" id="mobile-bottom-nav">
+    <button class="nav-item admin-only hidden flex-col items-center gap-1 text-[10px] p-1" data-tab="trip">
+      <i data-lucide="settings" class="w-5 h-5"></i> Cài đặt
+    </button>
+    <button class="nav-item admin-only hidden flex-col items-center gap-1 text-[10px] p-1" data-tab="fund">
+      <i data-lucide="wallet" class="w-5 h-5"></i> Thu quỹ
+    </button>
+    <button class="nav-item active flex-col items-center gap-1 text-[10px] p-1" data-tab="expense">
+      <i data-lucide="receipt" class="w-5 h-5"></i> Chi tiêu
+    </button>
+    <button class="nav-item flex-col items-center gap-1 text-[10px] p-1" data-tab="stats">
+      <i data-lucide="pie-chart" class="w-5 h-5"></i> Thống kê
+    </button>
+    <button class="nav-item admin-only hidden flex-col items-center gap-1 text-[10px] p-1" data-tab="settle">
+      <i data-lucide="check-circle-2" class="w-5 h-5"></i> Quyết toán
+    </button>
+  </nav>
+
+  <!-- VIETQR MODAL (CHUẨN 100% TẤT CẢ NGÂN HÀNG) -->
+  <div id="vietqr-modal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="bento-card w-full max-w-sm p-6 text-center relative border border-teal-500/30">
+      <h3 class="text-base font-extrabold text-white mb-1">Mã Chuyển Khoản VietQR</h3>
+      <p id="qr-transfer-info" class="text-xs text-slate-300 mb-3"></p>
+      
+      <div class="bg-white p-3.5 rounded-2xl inline-block mb-3 shadow-2xl relative">
+        <img id="qr-image" src="" alt="Mã VietQR" class="w-56 h-56 object-contain" onerror="this.src='https://api.qrserver.com/v1/create-qr-code/?size=250x250&data='+encodeURIComponent(window.lastQRData||'VietQR')">
+      </div>
+
+      <!-- Nút sao chép 1-chạm STK và Số Tiền -->
+      <div class="grid grid-cols-2 gap-2 mb-3">
+        <button id="btn-copy-acc" class="py-2 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-xs text-slate-200 font-bold transition flex items-center justify-center gap-1">
+          📋 Copy STK
+        </button>
+        <button id="btn-copy-amt" class="py-2 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-xs text-slate-200 font-bold transition flex items-center justify-center gap-1">
+          💵 Copy Số Tiền
+        </button>
+      </div>
+
+      <button type="button" id="close-vietqr" class="btn-glow w-full py-2.5 text-xs font-bold">Đóng</button>
+    </div>
+  </div>
+
+  <!-- LIGHTBOX IMAGE PREVIEW -->
+  <div id="lightbox-modal" class="fixed inset-0 z-50 bg-slate-950/92 backdrop-blur-lg flex items-center justify-center p-4 hidden">
+    <div class="relative max-w-3xl max-h-[90vh] flex flex-col items-center">
+      <div class="relative w-full flex items-center justify-center">
+        <img id="lightbox-img" src="" class="max-w-full max-h-[80vh] rounded-2xl object-contain shadow-2xl border border-white/20" alt="Hóa đơn">
+        <button id="close-lightbox" class="absolute -top-4 -right-4 w-9 h-9 rounded-full bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center font-bold shadow-xl transition">✕</button>
+      </div>
+      <div id="lightbox-fallback-link" class="mt-3 text-center"></div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <!-- JAVASCRIPT ENGINE 3.0 (SAFE & ROBUST) -->
+  <script>
+  (function() {
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxhLq4ZgFXsWetbyxOhFhd8PsfqGAVye4K8p_0zU2Y9lHP3wSYeIFlCDa-Pc2bj_T6e/exec';
+    
+    let trips = [], currentTrip = null, members = [], funds = [], expenses = [];
+    let currentTripId = localStorage.getItem('activeTripId') || null;
+    let isAdmin = sessionStorage.getItem('is_admin_mode') === 'true';
+    let receiptBase64 = '', donutChartInstance = null, pollingTimer = null;
+    let isUserTyping = false;
+    let currentQRDetails = { acc: '', amt: 0, bank: '' };
+
+    // Standard Vietnamese Bank Registry
+    const VIETNAM_BANKS = [
+      { code: 'TIMO', name: 'Timo Digital Bank (Bản Việt / Timo)' },
+      { code: 'VCB', name: 'Vietcombank (Ngoại Thương)' },
+      { code: 'MB', name: 'MBBank (Quân Đội)' },
+      { code: 'TCB', name: 'Techcombank (Kỹ Thương)' },
+      { code: 'ICB', name: 'VietinBank (Công Thương)' },
+      { code: 'BIDV', name: 'BIDV (Đầu Tư & Phát Triển)' },
+      { code: 'ACB', name: 'ACB (Á Châu)' },
+      { code: 'VPB', name: 'VPBank (Việt Nam Thịnh Vượng)' },
+      { code: 'TPB', name: 'TPBank (Tiên Phong)' },
+      { code: 'STB', name: 'Sacombank (Sài Gòn Thương Tín)' },
+      { code: 'VIB', name: 'VIB (Quốc Tế)' },
+      { code: 'SHB', name: 'SHB (Sài Gòn - Hà Nội)' },
+      { code: 'HDB', name: 'HDBank (Phát Triển TP.HCM)' },
+      { code: 'VBA', name: 'Agribank (Nông Nghiệp)' },
+      { code: 'CAKE', name: 'CAKE by VPBank' },
+      { code: 'OCB', name: 'OCB (Phương Đông)' },
+      { code: 'MSB', name: 'MSB (Hàng Hải)' },
+      { code: 'LPB', name: 'LPBank (Lộc Phát)' },
+      { code: 'SEAB', name: 'SeABank (Đông Nam Á)' }
+    ];
+
+    function resolveBankCode(bankStr) {
+      if (!bankStr) return 'MB';
+      const clean = bankStr.toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (clean.includes('timo')) return 'TIMO';
+      if (clean.includes('vietcom') || clean.includes('vcb')) return 'VCB';
+      if (clean.includes('mb') || clean.includes('quandoi')) return 'MB';
+      if (clean.includes('techcom') || clean.includes('tcb')) return 'TCB';
+      if (clean.includes('vietin') || clean.includes('icb') || clean.includes('ctg')) return 'ICB';
+      if (clean.includes('bidv')) return 'BIDV';
+      if (clean.includes('acb') || clean.includes('achau')) return 'ACB';
+      if (clean.includes('vp') || clean.includes('thinhvuong')) return 'VPB';
+      if (clean.includes('tp') || clean.includes('tienphong')) return 'TPB';
+      if (clean.includes('sacom') || clean.includes('stb')) return 'STB';
+      if (clean.includes('vib')) return 'VIB';
+      if (clean.includes('shb')) return 'SHB';
+      if (clean.includes('hd')) return 'HDB';
+      if (clean.includes('agri') || clean.includes('nongnghiep')) return 'VBA';
+      if (clean.includes('cake')) return 'CAKE';
+      if (clean.includes('ocb')) return 'OCB';
+      if (clean.includes('msb')) return 'MSB';
+      if (clean.includes('lpb') || clean.includes('locphat')) return 'LPB';
+      return bankStr.toUpperCase().replace(/\s+/g, '');
+    }
+
+    const avatarGradients = [
+      'from-teal-400 to-blue-500', 'from-pink-500 to-rose-500',
+      'from-purple-500 to-indigo-500', 'from-amber-400 to-orange-500',
+      'from-emerald-400 to-teal-600', 'from-cyan-400 to-blue-600'
+    ];
+
+    function getAvatarInitials(name) {
+      if (!name) return 'TV';
+      const parts = name.trim().split(/\s+/);
+      if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+
+    function formatVND(num) {
+      return new Intl.NumberFormat('vi-VN').format(Math.round(num || 0)) + ' VND';
+    }
+    function parseMoney(val) {
+      return Number(String(val).replace(/[^0-9]/g, '')) || 0;
+    }
+    function getGMT7Now() {
+      const d = new Date();
+      const pad = n => String(n).padStart(2, '0');
+      return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())} ${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+    }
+    function formatDateVN(dateStr) {
+      if (!dateStr) return '--/--/----';
+      if (String(dateStr).includes('/')) return dateStr;
+      const p = String(dateStr).slice(0, 10).split('-');
+      return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : dateStr;
+    }
+    function toast(msg) {
+      const el = document.createElement('div');
+      el.className = 'toast';
+      el.textContent = msg;
+      const container = document.getElementById('toast-container');
+      if (container) {
+        container.appendChild(el);
+        setTimeout(() => el.remove(), 3200);
+      }
+    }
+    function setSyncState(state) {
+      const badge = document.getElementById('sync-status');
+      if (badge) {
+        badge.className = `sync-status ${state}`;
+        badge.title = state === 'syncing' ? 'Đang đồng bộ...' : (state === 'offline' ? 'Mất kết nối' : 'Đã kết nối trực tiếp');
+      }
+    }
+
+    function getDirectImageUrl(url) {
+      if (!url) return '';
+      if (url.startsWith('data:image/')) return url;
+      const match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/) || url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      if (match && match[1]) {
+        return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1600`;
+      }
+      return url;
+    }
+
+    // Populate Bank Dropdown
+    const bankSelect = document.getElementById('m-bank-select');
+    if (bankSelect) {
+      bankSelect.innerHTML = VIETNAM_BANKS.map(b => `<option value="${b.code}">${b.name}</option>`).join('');
+    }
+
+    // Currency Formatting
+    document.querySelectorAll('.currency-input').forEach(inp => {
+      inp.addEventListener('input', e => {
+        const raw = e.target.value.replace(/[^0-9]/g, '');
+        e.target.value = raw ? new Intl.NumberFormat('vi-VN').format(Number(raw)) : '';
+      });
+    });
+
+    document.querySelectorAll('input, select, textarea').forEach(el => {
+      el.addEventListener('focus', () => { isUserTyping = true; });
+      el.addEventListener('blur', () => { setTimeout(() => { isUserTyping = false; }, 600); });
+    });
+
+    // --- API CLIENT ---
+    async function apiCall(method, body = null, params = '') {
+      try {
+        setSyncState('syncing');
+        const url = params ? `${API_URL}?${params}` : API_URL;
+        const opts = method === 'POST' 
+          ? { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) } 
+          : { method: 'GET' };
+        const res = await fetch(url, opts);
+        const data = await res.json();
+        setSyncState('online');
+        return data;
+      } catch (err) {
+        setSyncState('offline');
+        return { error: true, message: err.toString() };
+      }
+    }
+
+    // --- ACCESS CONTROL ---
+    function updateRoleUI() {
+      document.querySelectorAll('.admin-only').forEach(el => {
+        el.classList.toggle('hidden', !isAdmin);
+      });
+      const badgeRole = document.getElementById('badge-role');
+      if (badgeRole) badgeRole.textContent = isAdmin ? 'Quản trị viên' : 'Thành viên';
+      if (!isAdmin) {
+        const active = document.querySelector('.panel.active');
+        if (active && (active.id === 'panel-trip' || active.id === 'panel-fund' || active.id === 'panel-settle')) {
+          switchTab('expense');
+        }
+      }
+    }
+
+    function switchTab(tab) {
+      if (!isAdmin && ['trip', 'fund', 'settle'].includes(tab)) tab = 'expense';
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      const target = document.getElementById(`panel-${tab}`);
+      if (target) target.classList.add('active');
+      document.querySelectorAll('#sidebar-nav .nav-item, #mobile-bottom-nav .nav-item').forEach(n => {
+        n.classList.toggle('active', n.dataset.tab === tab);
+        if (n.dataset.tab === tab) n.classList.add('text-teal-400');
+        else n.classList.remove('text-teal-400');
+      });
+      if (tab === 'settle') calculateAndRenderSettlement();
+    }
+
+    document.getElementById('sidebar-nav')?.addEventListener('click', e => {
+      const item = e.target.closest('[data-tab]');
+      if (item) switchTab(item.dataset.tab);
+    });
+    document.getElementById('mobile-bottom-nav')?.addEventListener('click', e => {
+      const item = e.target.closest('[data-tab]');
+      if (item) switchTab(item.dataset.tab);
+    });
+
+    // --- ADMIN PIN TRIGGER ---
+    let pendingAction = null;
+    function promptAdminPin(action = null) {
+      pendingAction = action;
+      const pinInp = document.getElementById('secret-pin-input');
+      const pinModal = document.getElementById('secret-pin-modal');
+      if (pinInp && pinModal) {
+        pinInp.value = '';
+        pinModal.classList.remove('hidden');
+        pinInp.focus();
+      }
+    }
+    document.getElementById('welcome-logo-trigger')?.addEventListener('click', () => promptAdminPin());
+    document.getElementById('header-logo-trigger')?.addEventListener('click', () => promptAdminPin());
+    document.getElementById('close-pin-modal')?.addEventListener('click', () => {
+      document.getElementById('secret-pin-modal')?.classList.add('hidden');
+      pendingAction = null;
+    });
+    document.getElementById('secret-pin-form')?.addEventListener('submit', e => {
+      e.preventDefault();
+      if (document.getElementById('secret-pin-input')?.value === '032') {
+        isAdmin = true;
+        sessionStorage.setItem('is_admin_mode', 'true');
+        document.getElementById('secret-pin-modal')?.classList.add('hidden');
+        updateRoleUI();
+        toast('Đã mở quyền Quản trị viên!');
+        if (pendingAction === 'create_trip') {
+          document.getElementById('create-trip-modal')?.classList.remove('hidden');
+          pendingAction = null;
+        } else if (currentTripId) {
+          switchTab('trip');
+        }
+      } else {
+        toast('Mã PIN không đúng!');
+      }
+    });
+    document.getElementById('exit-admin-btn')?.addEventListener('click', () => {
+      isAdmin = false;
+      sessionStorage.removeItem('is_admin_mode');
+      updateRoleUI();
+      switchTab('expense');
+      toast('Đã thoát quyền Quản trị.');
+    });
+
+    // --- TRIP MANAGEMENT & WELCOME ---
+    function renderWelcomeTrips() {
+      const list = document.getElementById('active-trip-list');
+      if (!list) return;
+      const valid = trips.filter(t => t.TrangThai !== 'Đã quyết toán');
+      const countEl = document.getElementById('trip-count');
+      if (countEl) countEl.textContent = valid.length ? `${valid.length} chuyến` : '';
+      if (!valid.length) {
+        list.innerHTML = '';
+        document.getElementById('no-active-trips')?.classList.remove('hidden');
+        return;
+      }
+      document.getElementById('no-active-trips')?.classList.add('hidden');
+      list.innerHTML = valid.map(t => `
+        <div class="bento-card p-4 cursor-pointer hover:border-teal-400 transition" onclick="window.selectTrip('${t.MaChuyenDi}')">
+          <div class="flex items-center justify-between">
+            <h4 class="font-bold text-white text-base">${t.TenChuyenDi}</h4>
+            <span class="badge-glass ${t.TrangThai === 'Đang quyết toán' ? 'text-amber-400' : 'text-emerald-400'}">${t.TrangThai || 'Đang đi'}</span>
+          </div>
+          <div class="text-xs text-slate-400 mt-1">${t.DiaDiem || 'Địa điểm'} • ${formatDateVN(t.NgayBatDau)} - ${formatDateVN(t.NgayKetThuc)}</div>
+          <div class="text-xs text-teal-400 mt-2 font-bold">Ngân sách: ${formatVND(t.NganSachDuKien)}</div>
+        </div>
+      `).join('');
+    }
+
+    window.selectTrip = function(tripId) {
+      currentTripId = tripId;
+      localStorage.setItem('activeTripId', tripId);
+      currentTrip = trips.find(t => t.MaChuyenDi === tripId) || { MaChuyenDi: tripId, TenChuyenDi: 'Chuyến đi' };
+      document.getElementById('welcome-screen')?.classList.add('hidden');
+      document.getElementById('app-shell')?.classList.remove('hidden');
+      updateRoleUI();
+      renderAll(true);
+      fetchTripDetails();
+      startPolling();
+    };
+
+    document.getElementById('btn-switch-trip')?.addEventListener('click', () => {
+      localStorage.removeItem('activeTripId');
+      currentTripId = null;
+      document.getElementById('app-shell')?.classList.add('hidden');
+      document.getElementById('welcome-screen')?.classList.remove('hidden');
+      fetchTrips();
+    });
+
+    document.getElementById('btn-open-create-trip')?.addEventListener('click', () => {
+      if (!isAdmin) {
+        promptAdminPin('create_trip');
+        return;
+      }
+      document.getElementById('create-trip-modal')?.classList.remove('hidden');
+    });
+    document.getElementById('close-create-trip')?.addEventListener('click', () => {
+      document.getElementById('create-trip-modal')?.classList.add('hidden');
+    });
+
+    document.getElementById('welcome-trip-form')?.addEventListener('submit', async e => {
+      e.preventDefault();
+      const tripId = 'TRIP_' + Date.now();
+      const name = document.getElementById('new-trip-name')?.value.trim();
+      const dest = document.getElementById('new-trip-dest')?.value.trim();
+      const start = document.getElementById('new-trip-start')?.value;
+      const end = document.getElementById('new-trip-end')?.value;
+      const budget = parseMoney(document.getElementById('new-trip-budget')?.value);
+      const memberNames = document.getElementById('new-trip-members')?.value.split(',').map(s => s.trim()).filter(Boolean);
+      
+      const newTripObj = {
+        MaChuyenDi: tripId, TenChuyenDi: name, DiaDiem: dest,
+        NgayBatDau: formatDateVN(start), NgayKetThuc: formatDateVN(end),
+        NganSachDuKien: budget, TienTe: 'VND', TrangThai: 'Đang đi', ThoiGianTao: getGMT7Now()
+      };
+
+      const initialMembers = memberNames.map(mName => ({
+        MaThanhVien: 'MEM_' + Math.random().toString(36).substr(2, 8),
+        MaChuyenDi: tripId, TenThanhVien: mName, VaiTro: 'Thành viên',
+        SoTaiKhoan: '', TenNganHang: 'MB', TienQuyDaDong: 0, ThoiGianThamGia: getGMT7Now()
+      }));
+
+      trips.unshift(newTripObj);
+      members = initialMembers;
+      funds = []; expenses = [];
+      document.getElementById('create-trip-modal')?.classList.add('hidden');
+      window.selectTrip(tripId);
+      toast('Đã khởi tạo chuyến đi!');
+
+      await apiCall('POST', { action: 'createTrip', trip: newTripObj, members: initialMembers });
+    });
+
+    // --- MEMBERS MANAGEMENT ---
+    document.getElementById('member-form')?.addEventListener('submit', async e => {
+      e.preventDefault();
+      const name = document.getElementById('m-name')?.value.trim();
+      const role = document.getElementById('m-role')?.value;
+      const bankAcc = document.getElementById('m-bank-acc')?.value.trim();
+      const bankName = document.getElementById('m-bank-select')?.value;
+
+      const newMem = {
+        MaThanhVien: 'MEM_' + Math.random().toString(36).substr(2, 8),
+        MaChuyenDi: currentTripId, TenThanhVien: name, VaiTro: role,
+        SoTaiKhoan: bankAcc, TenNganHang: bankName, TienQuyDaDong: 0, ThoiGianThamGia: getGMT7Now()
+      };
+
+      members.push(newMem);
+      renderMembers();
+      updateDynamicSelects();
+      toast(`Đã thêm ${name}`);
+      e.target.reset();
+      await apiCall('POST', { action: 'addMember', member: newMem });
+    });
+
+    function renderMembers() {
+      const container = document.getElementById('member-list-admin');
+      if (!container) return;
+      const validMembers = members.filter(m => m.TenThanhVien && m.TenThanhVien.trim() !== '');
+      const paidMap = getMemberFundPaidMap();
+
+      container.innerHTML = validMembers.map((m, i) => `
+        <div class="flex items-center justify-between p-3 rounded-2xl bg-white/[0.03] border border-white/5 text-xs hover:border-white/10 transition">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br ${avatarGradients[i % avatarGradients.length]} flex items-center justify-center font-bold text-white shadow">
+              ${getAvatarInitials(m.TenThanhVien)}
+            </div>
+            <div>
+              <div class="font-bold text-white">${m.TenThanhVien} <span class="text-[10px] text-teal-400 font-normal">(${m.VaiTro || 'Thành viên'})</span></div>
+              <div class="text-slate-400 text-[10px]">${m.SoTaiKhoan ? `${m.SoTaiKhoan} - ${m.TenNganHang}` : 'Chưa có STK'}</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2.5">
+            <span class="text-teal-300 font-bold" title="Tiền quỹ đã nộp thực tế">${formatVND(paidMap[m.TenThanhVien] || 0)}</span>
+            <button onclick="window.removeMember(${i})" class="text-rose-400 hover:text-rose-300 p-1 w-6 h-6 rounded-full hover:bg-rose-500/20 flex items-center justify-center transition">✕</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    window.removeMember = async function(idx) {
+      const m = members[idx];
+      if (confirm(`Xóa thành viên ${m.TenThanhVien}?`)) {
+        members.splice(idx, 1);
+        renderMembers();
+        updateDynamicSelects();
+        await apiCall('POST', { action: 'deleteMember', MaThanhVien: m.MaThanhVien, MaChuyenDi: currentTripId });
+      }
+    };
+
+    // --- FUND MANAGEMENT & BENEFICIARY RESOLVER ---
+    function getMemberFundPaidMap() {
+      const paidMap = {};
+      const validMembers = members.filter(m => m.TenThanhVien && m.TenThanhVien.trim() !== '');
+      validMembers.forEach(m => { paidMap[m.TenThanhVien] = 0; });
+      
+      funds.forEach(f => {
+        const payer = f.payer_name || f.NguoiNop || '';
+        const bensStr = f.beneficiaries || f.NguoiDuocBao || payer;
+        const bens = bensStr.split(',').map(s => s.trim()).filter(Boolean);
+        const totalAmt = Number(f.amount || f.SoTien || 0);
+        
+        if (bens.length > 0 && totalAmt > 0) {
+          const share = totalAmt / bens.length;
+          bens.forEach(b => {
+            if (paidMap[b] !== undefined) paidMap[b] += share;
+          });
+        } else if (payer && paidMap[payer] !== undefined) {
+          paidMap[payer] += totalAmt;
+        }
+      });
+      return paidMap;
+    }
+
+    document.getElementById('fund-form')?.addEventListener('submit', async e => {
+      e.preventDefault();
+      const payer = document.getElementById('fund-payer-select')?.value;
+      const amt = parseMoney(document.getElementById('fund-amount-input')?.value);
+      const covered = [...document.querySelectorAll('#fund-cover-chips .chip.selected')].map(c => c.dataset.name).filter(Boolean);
+      
+      if (!payer || !amt) return;
+      const targetBeneficiaries = covered.length > 0 ? covered : [payer];
+
+      const newFund = {
+        payer_name: payer,
+        NguoiNop: payer,
+        amount: amt,
+        SoTien: amt,
+        beneficiaries: targetBeneficiaries.join(', '),
+        NguoiDuocBao: targetBeneficiaries.join(', '),
+        created_at: getGMT7Now(),
+        ThoiGian: getGMT7Now(),
+        _isLocal: true
+      };
+      funds.unshift(newFund);
+
+      renderFunds();
+      renderMembers();
+      renderStats();
+      toast(`Đã nạp ${formatVND(amt)} từ ${payer}`);
+      const amtInp = document.getElementById('fund-amount-input');
+      if (amtInp) amtInp.value = '';
+
+      await apiCall('POST', {
+        action: 'addFund',
+        tripId: currentTripId,
+        NguoiNop: payer,
+        SoTien: amt,
+        NguoiDuocBao: targetBeneficiaries.join(', '),
+        ThoiGian: newFund.created_at
+      });
+      newFund._isLocal = false;
+    });
+
+    function renderFunds() {
+      const total = funds.reduce((sum, f) => sum + (Number(f.amount || f.SoTien) || 0), 0);
+      const totalDisp = document.getElementById('fund-total-display');
+      if (totalDisp) totalDisp.textContent = formatVND(total);
+      const hist = document.getElementById('fund-history-list');
+      if (hist) {
+        hist.innerHTML = funds.map(f => {
+          const payer = f.payer_name || f.NguoiNop || 'Thành viên';
+          const amt = Number(f.amount || f.SoTien || 0);
+          const bens = f.beneficiaries || f.NguoiDuocBao || payer;
+          const time = f.created_at || f.ThoiGian || f.ThoiGianTao || '';
+          return `
+            <div class="flex justify-between items-center p-3.5 rounded-2xl bg-white/[0.03] border border-white/5 text-xs hover:border-teal-400/30 transition">
+              <div>
+                <span class="font-bold text-white text-sm">${payer}</span>
+                <div class="text-[11px] text-teal-400 font-medium mt-0.5">Đóng cho: ${bens}</div>
+                <div class="text-[10px] text-slate-500 mt-0.5">${time}</div>
+              </div>
+              <span class="text-teal-400 font-black text-sm md:text-base">+${formatVND(amt)}</span>
+            </div>
+          `;
+        }).join('') || '<div class="text-xs text-slate-500 text-center py-6">Chưa có lượt nạp quỹ nào</div>';
+      }
+    }
+
+    // --- EXPENSES & SPONSOR LOGIC ---
+    document.getElementById('exp-source')?.addEventListener('change', e => {
+      document.getElementById('payer-field-wrapper')?.classList.toggle('hidden', e.target.value === 'Quỹ chung');
+    });
+
+    document.getElementById('exp-split-mode')?.addEventListener('change', e => {
+      const mode = e.target.value;
+      document.getElementById('custom-split-container')?.classList.toggle('hidden', mode !== 'Chỉ định số tiền');
+      document.getElementById('sponsor-container')?.classList.toggle('hidden', mode !== 'Có người bao');
+      if (mode === 'Chỉ định số tiền') renderCustomSplitRows();
+    });
+
+    function renderParticipantChips(force = false) {
+      const container = document.getElementById('participant-chips-container');
+      const fundCoverContainer = document.getElementById('fund-cover-chips');
+      const sponsorBenContainer = document.getElementById('sponsor-beneficiaries-chips');
+      const validMembers = members.filter(m => m.TenThanhVien && m.TenThanhVien.trim() !== '');
+
+      // Bảo toàn trạng thái chip người dùng đang chọn trước đó
+      const selectedParts = new Set([...(container?.querySelectorAll('.chip.selected') || [])].map(c => c.dataset.name));
+      const selectedFundCovers = new Set([...(fundCoverContainer?.querySelectorAll('.chip.selected') || [])].map(c => c.dataset.name));
+      const selectedSponsorBens = new Set([...(sponsorBenContainer?.querySelectorAll('.chip.selected') || [])].map(c => c.dataset.name));
+
+      const makeChips = (selectedSet, isInitialDefault) => validMembers.map((m, i) => {
+        const isSelected = selectedSet.size > 0 ? selectedSet.has(m.TenThanhVien) : isInitialDefault;
+        return `
+          <div class="chip ${isSelected ? 'selected' : ''}" data-name="${m.TenThanhVien}">
+            <div class="avatar-mini bg-gradient-to-br ${avatarGradients[i % avatarGradients.length]}">${getAvatarInitials(m.TenThanhVien)}</div>
+            <span>${m.TenThanhVien}</span>
+          </div>
+        `;
+      }).join('');
+
+      if (container) container.innerHTML = makeChips(selectedParts, true);
+      if (fundCoverContainer) fundCoverContainer.innerHTML = makeChips(selectedFundCovers, true);
+      if (sponsorBenContainer) sponsorBenContainer.innerHTML = makeChips(selectedSponsorBens, false);
+
+      document.querySelectorAll('.chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          chip.classList.toggle('selected');
+          if (document.getElementById('exp-split-mode')?.value === 'Chỉ định số tiền') renderCustomSplitRows();
+        });
+      });
+      lucide.createIcons();
+    }
+
+    document.getElementById('btn-select-all-parts')?.addEventListener('click', () => {
+      document.querySelectorAll('#participant-chips-container .chip').forEach(c => c.classList.add('selected'));
+      if (document.getElementById('exp-split-mode')?.value === 'Chỉ định số tiền') renderCustomSplitRows();
+    });
+
+    document.getElementById('btn-clear-all-parts')?.addEventListener('click', () => {
+      document.querySelectorAll('#participant-chips-container .chip').forEach(c => c.classList.remove('selected'));
+      if (document.getElementById('exp-split-mode')?.value === 'Chỉ định số tiền') renderCustomSplitRows();
+    });
+
+    function renderCustomSplitRows() {
+      const selected = [...document.querySelectorAll('#participant-chips-container .chip.selected')].map(c => c.dataset.name);
+      const container = document.getElementById('custom-split-rows');
+      if (!container) return;
+      container.innerHTML = selected.map(name => `
+        <div class="flex items-center justify-between gap-3 text-xs">
+          <span class="text-white font-bold">${name}</span>
+          <input type="text" class="input-glass w-36 text-right currency-input custom-split-item" data-member="${name}" placeholder="0">
+        </div>
+      `).join('');
+      
+      container.querySelectorAll('.custom-split-item').forEach(inp => {
+        inp.addEventListener('input', () => {
+          const raw = inp.value.replace(/[^0-9]/g, '');
+          inp.value = raw ? new Intl.NumberFormat('vi-VN').format(Number(raw)) : '';
+          updateCustomSplitSum();
+        });
+      });
+    }
+
+    function updateCustomSplitSum() {
+      const totalExp = parseMoney(document.getElementById('exp-amount')?.value);
+      const sum = [...document.querySelectorAll('.custom-split-item')].reduce((s, inp) => s + parseMoney(inp.value), 0);
+      const alertBox = document.getElementById('custom-split-total-alert');
+      if (alertBox) {
+        alertBox.textContent = `Tổng chỉ định: ${formatVND(sum)} / ${formatVND(totalExp)}`;
+        alertBox.className = `text-xs text-right pt-2 border-t border-white/10 font-bold ${sum === totalExp && totalExp > 0 ? 'text-emerald-400' : 'text-amber-400'}`;
+      }
+    }
+
+    // Auto Image Compressor (<100KB)
+    function compressImage(file, callback) {
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width, height = img.height;
+          const maxDim = 800;
+          if (width > height && width > maxDim) { height *= maxDim / width; width = maxDim; }
+          else if (height > maxDim) { width *= maxDim / height; height = maxDim; }
+          canvas.width = width; canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+          callback(compressedBase64);
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    const dropzone = document.getElementById('receipt-dropzone');
+    const fileInput = document.getElementById('receipt-input');
+    dropzone?.addEventListener('click', e => { if (e.target.id !== 'receipt-clear-btn') fileInput?.click(); });
+    fileInput?.addEventListener('change', e => {
+      if (e.target.files[0]) compressImage(e.target.files[0], b64 => {
+        receiptBase64 = b64;
+        const nameEl = document.getElementById('receipt-name');
+        if (nameEl) nameEl.textContent = `✅ ${e.target.files[0].name}`;
+        document.getElementById('receipt-clear-btn')?.classList.remove('hidden');
+      });
+    });
+    dropzone?.addEventListener('dragover', e => e.preventDefault());
+    dropzone?.addEventListener('drop', e => {
+      e.preventDefault();
+      if (e.dataTransfer.files[0]) compressImage(e.dataTransfer.files[0], b64 => {
+        receiptBase64 = b64;
+        const nameEl = document.getElementById('receipt-name');
+        if (nameEl) nameEl.textContent = '✅ Đã tải ảnh hóa đơn';
+        document.getElementById('receipt-clear-btn')?.classList.remove('hidden');
+      });
+    });
+    document.addEventListener('paste', e => {
+      const item = [...(e.clipboardData?.items || [])].find(i => i.type.startsWith('image/'));
+      if (item) compressImage(item.getAsFile(), b64 => {
+        receiptBase64 = b64;
+        const nameEl = document.getElementById('receipt-name');
+        if (nameEl) nameEl.textContent = '✅ Đã dán ảnh hóa đơn (Ctrl+V)';
+        document.getElementById('receipt-clear-btn')?.classList.remove('hidden');
+      });
+    });
+    document.getElementById('receipt-clear-btn')?.addEventListener('click', e => {
+      e.stopPropagation();
+      receiptBase64 = ''; if (fileInput) fileInput.value = '';
+      const nameEl = document.getElementById('receipt-name');
+      if (nameEl) nameEl.textContent = '📎 Chọn ảnh hoặc dán Ctrl+V';
+      document.getElementById('receipt-clear-btn')?.classList.add('hidden');
+    });
+
+    document.getElementById('expense-form')?.addEventListener('submit', async e => {
+      e.preventDefault();
+      const desc = document.getElementById('exp-desc')?.value.trim();
+      const amount = parseMoney(document.getElementById('exp-amount')?.value);
+      const category = document.getElementById('exp-category')?.value;
+      const source = document.getElementById('exp-source')?.value;
+      const payer = source === 'Quỹ chung' ? 'Quỹ chung' : document.getElementById('exp-payer')?.value;
+      const splitMode = document.getElementById('exp-split-mode')?.value;
+      const parts = [...document.querySelectorAll('#participant-chips-container .chip.selected')].map(c => c.dataset.name).filter(Boolean);
+
+      if (!amount) return toast('Vui lòng nhập số tiền hợp lệ');
+      if (!parts.length) return toast('Vui lòng chọn ít nhất 1 người tham gia');
+      if (source === 'Cá nhân ứng trước' && !payer) return toast('Vui lòng chọn người ứng trước');
+
+      let sponsorPayer = '', sponsorBeneficiaries = [];
+      if (splitMode === 'Có người bao') {
+        sponsorPayer = document.getElementById('sponsor-payer-select')?.value;
+        sponsorBeneficiaries = [...document.querySelectorAll('#sponsor-beneficiaries-chips .chip.selected')].map(c => c.dataset.name).filter(Boolean);
+      }
+
+      const expObj = {
+        MaGiaoDich: 'EXP_' + Date.now(),
+        MaChuyenDi: currentTripId,
+        MoTa: desc,
+        SoTien: amount,
+        DanhMuc: category,
+        NguonTien: source,
+        NguoiTra: payer,
+        CachChia: splitMode,
+        NguoiThamGia: parts.join(', '),
+        LinkHoaDon: receiptBase64,
+        NguoiBao: sponsorPayer,
+        NguoiDuocBao: sponsorBeneficiaries.join(', '),
+        ThoiGianTao: getGMT7Now(),
+        _isLocal: true
+      };
+
+      expenses = expenses.filter(x => x.MaGiaoDich !== expObj.MaGiaoDich);
+      expenses.unshift(expObj);
+      renderExpenses();
+      renderStats();
+      toast('Đã ghi nhận chi tiêu!');
+
+      e.target.reset();
+      receiptBase64 = '';
+      const nameEl = document.getElementById('receipt-name');
+      if (nameEl) nameEl.textContent = '📎 Chọn ảnh hoặc dán Ctrl+V';
+      document.getElementById('receipt-clear-btn')?.classList.add('hidden');
+      document.getElementById('payer-field-wrapper')?.classList.add('hidden');
+      document.getElementById('custom-split-container')?.classList.add('hidden');
+      document.getElementById('sponsor-container')?.classList.add('hidden');
+
+      const res = await apiCall('POST', { action: 'addExpense', expense: expObj, imageBase64: expObj.LinkHoaDon || undefined });
+      expObj._isLocal = false;
+      if (res && res.LinkHoaDon) {
+        expObj.LinkHoaDon = res.LinkHoaDon;
+        renderExpenses();
+      }
+    });
+
+    function renderExpenses() {
+      const container = document.getElementById('expense-history-list');
+      if (!container) return;
+      const seen = new Set();
+      const unique = expenses.filter(e => {
+        const key = e.MaGiaoDich || (e.MoTa + '_' + e.SoTien + '_' + e.ThoiGianTao);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+
+      container.innerHTML = unique.map(e => `
+        <div class="bento-card p-4 flex items-center justify-between gap-3 text-xs hover:border-teal-400/40 transition">
+          <div class="min-w-0">
+            <div class="font-extrabold text-white text-sm md:text-base truncate">${e.MoTa}</div>
+            <div class="text-slate-400 text-[11px] mt-1 font-medium">${e.DanhMuc} • ${e.NguonTien === 'Quỹ chung' ? 'Quỹ chung' : `${e.NguoiTra} ứng`} • ${e.ThoiGianTao || ''}</div>
+            <div class="text-slate-500 text-[10px] mt-1">Cùng chia: ${e.NguoiThamGia}</div>
+            ${e.NguoiBao ? `<div class="text-teal-300 text-[10px] font-bold mt-1">🎁 ${e.NguoiBao} bao cho (${e.NguoiDuocBao})</div>` : ''}
+          </div>
+          <div class="flex items-center gap-3 shrink-0">
+            ${e.LinkHoaDon ? `
+              <button onclick="window.previewImage('${e.LinkHoaDon}')" class="p-2 rounded-xl bg-teal-500/15 text-teal-300 hover:bg-teal-500/30 border border-teal-500/20 transition flex items-center gap-1">
+                <i data-lucide="image" class="w-4 h-4"></i>
+                <span class="text-[10px] font-bold hidden sm:inline">Hóa đơn</span>
+              </button>
+            ` : ''}
+            <span class="font-black text-rose-400 text-sm md:text-base">${formatVND(e.SoTien)}</span>
+          </div>
+        </div>
+      `).join('') || '<div class="text-xs text-slate-500 text-center py-8">Chưa có chi tiêu nào</div>';
+      lucide.createIcons();
+    }
+
+    // FIX TRIỆT ĐỂ LỖI XEM ẢNH HÓA ĐƠN
+    window.previewImage = function(rawUrl) {
+      if (!rawUrl) return;
+      const directUrl = getDirectImageUrl(rawUrl);
+      const img = document.getElementById('lightbox-img');
+      if (img) img.src = directUrl;
+
+      const fallbackDiv = document.getElementById('lightbox-fallback-link');
+      if (fallbackDiv) {
+        if (rawUrl.includes('drive.google.com')) {
+          fallbackDiv.innerHTML = `<a href="${rawUrl}" target="_blank" class="text-xs text-teal-400 hover:underline flex items-center justify-center gap-1 font-bold">🔗 Mở ảnh gốc trên Google Drive</a>`;
+        } else {
+          fallbackDiv.innerHTML = '';
+        }
+      }
+
+      document.getElementById('lightbox-modal')?.classList.remove('hidden');
+    };
+    document.getElementById('close-lightbox')?.addEventListener('click', () => {
+      document.getElementById('lightbox-modal')?.classList.add('hidden');
+    });
+
+    // --- ACCURATE DOUBLE-ENTRY DEBT SETTLEMENT ENGINE ---
+    function calculateBalances() {
+      const bal = {};
+      const validMembers = members.filter(m => m.TenThanhVien && m.TenThanhVien.trim() !== '');
+      const paidMap = getMemberFundPaidMap();
+      validMembers.forEach(m => { bal[m.TenThanhVien] = paidMap[m.TenThanhVien] || 0; });
+
+      expenses.forEach(e => {
+        const parts = (e.NguoiThamGia || '').split(',').map(s => s.trim()).filter(Boolean);
+        if (!parts.length) return;
+        const totalAmount = Number(e.SoTien) || 0;
+
+        if (e.CachChia === 'Có người bao' && e.NguoiBao) {
+          const beneficiaries = (e.NguoiDuocBao || '').split(',').map(s => s.trim()).filter(Boolean);
+          const share = totalAmount / parts.length;
+          parts.forEach(p => {
+            if (beneficiaries.includes(p)) {
+              if (bal[e.NguoiBao] !== undefined) bal[e.NguoiBao] -= share;
+            } else {
+              if (bal[p] !== undefined) bal[p] -= share;
+            }
+          });
+        } else {
+          const share = totalAmount / parts.length;
+          parts.forEach(p => { if (bal[p] !== undefined) bal[p] -= share; });
+        }
+
+        if (e.NguonTien !== 'Quỹ chung' && bal[e.NguoiTra] !== undefined) {
+          bal[e.NguoiTra] += totalAmount;
+        }
+      });
+      return bal;
+    }
+
+    function renderStats() {
+      const totalFund = funds.reduce((s, f) => s + Number(f.amount || 0), 0);
+      const totalExp = expenses.reduce((s, e) => s + Number(e.SoTien || 0), 0);
+      const fundSpent = expenses.filter(e => e.NguonTien === 'Quỹ chung').reduce((s, e) => s + Number(e.SoTien || 0), 0);
+      const leftoverFund = totalFund - fundSpent;
+
+      const fEl = document.getElementById('stat-total-fund');
+      const eEl = document.getElementById('stat-total-expense');
+      const bEl = document.getElementById('stat-fund-balance');
+      if (fEl) fEl.textContent = formatVND(totalFund);
+      if (eEl) eEl.textContent = formatVND(totalExp);
+      if (bEl) bEl.textContent = formatVND(leftoverFund);
+
+      const cats = { 'Ăn uống': 0, 'Di chuyển': 0, 'Lưu trú': 0, 'Vé tham quan': 0, 'Phát sinh': 0 };
+      expenses.forEach(e => { if (cats[e.DanhMuc] !== undefined) cats[e.DanhMuc] += Number(e.SoTien || 0); });
+      
+      const catList = document.getElementById('category-breakdown-list');
+      if (catList) {
+        catList.innerHTML = Object.entries(cats).map(([k, v]) => `
+          <div class="flex justify-between items-center py-1.5 border-b border-white/5">
+            <span class="text-slate-300 font-medium">${k}</span>
+            <span class="font-bold text-white">${formatVND(v)}</span>
+          </div>
+        `).join('');
+      }
+
+      const chartEl = document.getElementById('category-chart');
+      if (chartEl) {
+        if (donutChartInstance) donutChartInstance.destroy();
+        const ctx = chartEl.getContext('2d');
+        donutChartInstance = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: Object.keys(cats),
+            datasets: [{ data: Object.values(cats), backgroundColor: ['#0d9488', '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b'], borderWidth: 0 }]
+          },
+          options: { responsive: true, plugins: { legend: { display: false } }, cutout: '72%' }
+        });
+      }
+
+      const bal = calculateBalances();
+      const debtTable = document.getElementById('member-debt-table');
+      if (debtTable) {
+        debtTable.innerHTML = `
+          <table class="w-full text-xs text-left">
+            <thead>
+              <tr class="border-b border-white/10 text-slate-400 font-bold uppercase">
+                <th class="py-2.5">Thành viên</th>
+                <th class="py-2.5 text-right">Số dư ròng</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${Object.entries(bal).map(([name, val]) => `
+                <tr class="border-b border-white/5 hover:bg-white/[0.02] transition">
+                  <td class="py-2.5 text-slate-200 font-bold">${name}</td>
+                  <td class="py-2.5 text-right font-black ${val >= 0 ? 'text-emerald-400' : 'text-rose-400'}">
+                    ${val >= 0 ? '+' : ''}${formatVND(val)}
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+      }
+    }
+
+    // --- AUTOMATIC SETTLEMENT & VIETQR ---
+    function calculateAndRenderSettlement() {
+      const bal = calculateBalances();
+      const debtors = [], creditors = [];
+      Object.entries(bal).forEach(([name, val]) => {
+        const rounded = Math.round(val);
+        if (rounded < -100) debtors.push({ name, amount: -rounded });
+        else if (rounded > 100) creditors.push({ name, amount: rounded });
+      });
+
+      debtors.sort((a, b) => b.amount - a.amount);
+      creditors.sort((a, b) => b.amount - a.amount);
+
+      const txns = [];
+      let i = 0, j = 0;
+      while (i < debtors.length && j < creditors.length) {
+        const amt = Math.min(debtors[i].amount, creditors[j].amount);
+        if (amt > 0) txns.push({ from: debtors[i].name, to: creditors[j].name, amount: amt });
+        debtors[i].amount -= amt; creditors[j].amount -= amt;
+        if (debtors[i].amount === 0) i++;
+        if (creditors[j].amount === 0) j++;
+      }
+
+      const container = document.getElementById('settlement-plan-list');
+      if (!container) return;
+      if (!txns.length) {
+        container.innerHTML = '<div class="text-emerald-400 text-xs py-4 font-bold text-center">🎉 Tất cả công nợ đã cân bằng hoàn hảo!</div>';
+      } else {
+        container.innerHTML = txns.map((t, idx) => {
+          const toMem = members.find(m => m.TenThanhVien === t.to) || {};
+          const bankCode = resolveBankCode(toMem.TenNganHang);
+          const bankInfo = toMem.SoTaiKhoan ? `${toMem.TenNganHang || 'Bank'}: ${toMem.SoTaiKhoan}` : 'Chưa có thông tin STK';
+          return `
+            <div class="bento-card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs" id="settle-card-${idx}">
+              <div>
+                <div class="font-extrabold text-white text-sm">
+                  <span class="text-rose-400">${t.from}</span> <span class="text-slate-500">chuyển cho</span> <span class="text-emerald-400">${t.to}</span>
+                </div>
+                <div class="text-slate-400 text-[11px] mt-1 font-medium">🏦 ${bankInfo}</div>
+              </div>
+              <div class="flex items-center gap-2.5 flex-wrap">
+                <span class="font-black text-white text-base">${formatVND(t.amount)}</span>
+                ${toMem.SoTaiKhoan ? `
+                  <button onclick="window.openVietQR('${bankCode}', '${toMem.SoTaiKhoan}', '${toMem.TenThanhVien}', ${t.amount})" class="px-3 py-2 rounded-xl bg-teal-500/20 text-teal-300 hover:bg-teal-500/30 font-bold text-xs border border-teal-500/30 transition flex items-center gap-1">
+                    📱 Quét VietQR
+                  </button>
+                ` : ''}
+                <button onclick="document.getElementById('settle-card-${idx}')?.classList.toggle('opacity-30')" class="px-3 py-2 rounded-xl bg-emerald-500/20 text-emerald-300 font-bold text-xs border border-emerald-500/30">
+                  ✓ Đã chuyển
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Fund Refund
+      const totalFund = funds.reduce((s, f) => s + Number(f.amount || 0), 0);
+      const fundSpent = expenses.filter(e => e.NguonTien === 'Quỹ chung').reduce((s, e) => s + Number(e.SoTien || 0), 0);
+      const leftoverFund = totalFund - fundSpent;
+      const refundBox = document.getElementById('fund-refund-box');
+      if (refundBox) {
+        if (leftoverFund > 1000) {
+          refundBox.classList.remove('hidden');
+          const refList = document.getElementById('fund-refund-list');
+          if (refList) refList.innerHTML = `Số dư quỹ còn: <strong class="text-emerald-300 font-bold">${formatVND(leftoverFund)}</strong> (Chia hoàn trả lại cho những người đã nộp quỹ).`;
+        } else {
+          refundBox.classList.add('hidden');
+        }
+      }
+      lucide.createIcons();
+    }
+
+    // VietQR Modal Handler
+    window.openVietQR = function(bank, acc, name, amount) {
+      const bankCode = resolveBankCode(bank);
+      const cleanAcc = String(acc).trim();
+      const roundedAmount = Math.round(amount);
+      
+      currentQRDetails = { acc: cleanAcc, amt: roundedAmount, bank: bankCode };
+      window.lastQRData = `2|99|${cleanAcc}|${name}|${roundedAmount}|0|0|QuyetToanDuLich`;
+      
+      const qrUrl = `https://img.vietqr.io/image/${bankCode}-${cleanAcc}-compact2.png?amount=${roundedAmount}&addInfo=QuyetToanDuLich&accountName=${encodeURIComponent(name)}`;
+      
+      const qrImg = document.getElementById('qr-image');
+      if (qrImg) qrImg.src = qrUrl;
+      
+      const infoEl = document.getElementById('qr-transfer-info');
+      if (infoEl) infoEl.innerHTML = `Chuyển cho: <strong class="text-white">${name}</strong> (${bankCode} - ${cleanAcc})<br><span class="text-teal-400 font-black text-sm">${formatVND(roundedAmount)}</span>`;
+      document.getElementById('vietqr-modal')?.classList.remove('hidden');
+    };
+
+    document.getElementById('btn-copy-acc')?.addEventListener('click', () => {
+      if (currentQRDetails.acc) {
+        navigator.clipboard.writeText(currentQRDetails.acc);
+        toast(`Đã copy STK: ${currentQRDetails.acc}`);
+      }
+    });
+
+    document.getElementById('btn-copy-amt')?.addEventListener('click', () => {
+      if (currentQRDetails.amt) {
+        navigator.clipboard.writeText(String(currentQRDetails.amt));
+        toast(`Đã copy số tiền: ${currentQRDetails.amt}`);
+      }
+    });
+
+    document.getElementById('close-vietqr')?.addEventListener('click', () => {
+      document.getElementById('vietqr-modal')?.classList.add('hidden');
+    });
+
+    // Copy Detailed Summary for Zalo
+    document.getElementById('btn-copy-zalo')?.addEventListener('click', () => {
+      const bal = calculateBalances();
+      const totalFund = funds.reduce((s, f) => s + Number(f.amount || 0), 0);
+      const totalExp = expenses.reduce((s, e) => s + Number(e.SoTien || 0), 0);
+
+      let text = `✈️ BÁO CÁO TỔNG KẾT THU CHI: ${currentTrip?.TenChuyenDi || 'Chuyến Đi'}\n`;
+      text += `📅 Thời gian: ${formatDateVN(currentTrip?.NgayBatDau)} - ${formatDateVN(currentTrip?.NgayKetThuc)}\n`;
+      text += `💰 Tổng thu quỹ: ${formatVND(totalFund)}\n`;
+      text += `💸 Tổng chi tiêu: ${formatVND(totalExp)}\n`;
+      text += `------------------------------------\n`;
+      text += `📊 SỐ DƯ CÔNG NỢ TỪNG THÀNH VIÊN:\n`;
+      Object.entries(bal).forEach(([n, v]) => {
+        text += `• ${n}: ${v >= 0 ? '+' : ''}${formatVND(v)}\n`;
+      });
+      text += `------------------------------------\n`;
+      text += `💳 CÁC GIAO DỊCH CẦN CHUYỂN KHOẢN:\n`;
+      
+      const settleCards = document.querySelectorAll('#settlement-plan-list > div');
+      if (!settleCards.length) {
+        text += `🎉 Tất cả công nợ đã thanh toán hoàn tất!\n`;
+      } else {
+        settleCards.forEach(d => {
+          text += d.innerText.replace(/\n+/g, ' - ') + '\n';
+        });
+      }
+      navigator.clipboard.writeText(text);
+      toast('Đã sao chép bảng tổng kết chi tiết gửi Zalo!');
+    });
+
+    document.getElementById('btn-lock-trip')?.addEventListener('click', async () => {
+      if (confirm('Khóa sổ chuyến đi này? Toàn bộ dữ liệu sẽ chuyển sang trạng thái Đã quyết toán.')) {
+        if (currentTrip) currentTrip.TrangThai = 'Đã quyết toán';
+        const stBadge = document.getElementById('badge-trip-status');
+        if (stBadge) stBadge.textContent = 'Đã quyết toán';
+        toast('Đã khóa sổ chuyến đi!');
+        await apiCall('POST', { action: 'lockTrip', MaChuyenDi: currentTripId });
+      }
+    });
+
+    // --- RE-RENDER & SELECTS SYNC (NON-DESTRUCTIVE & SMART DIFF) ---
+    let lastMemberSignature = '';
+
+    function updateDynamicSelects(force = false) {
+      const validMembers = members.filter(m => m.TenThanhVien && m.TenThanhVien.trim() !== '');
+      const currentSignature = validMembers.map(m => `${m.MaThanhVien}_${m.TenThanhVien}`).join('|');
+      
+      // Nếu danh sách thành viên không thay đổi, KHÔNG BAO GIỜ can thiệp vào form người dùng đang nhập!
+      if (!force && currentSignature === lastMemberSignature) return;
+      lastMemberSignature = currentSignature;
+
+      const fPayer = document.getElementById('fund-payer-select');
+      const ePayer = document.getElementById('exp-payer');
+      const sPayer = document.getElementById('sponsor-payer-select');
+
+      // Giữ nguyên giá trị người dùng đang chọn
+      const currentFPayer = fPayer?.value || '';
+      const currentEPayer = ePayer?.value || '';
+      const currentSPayer = sPayer?.value || '';
+
+      const opts = validMembers.map(m => `<option value="${m.TenThanhVien}">${m.TenThanhVien}</option>`).join('');
+      if (fPayer) {
+        fPayer.innerHTML = '<option value="">-- Chọn thành viên --</option>' + opts;
+        if (currentFPayer) fPayer.value = currentFPayer;
+      }
+      if (ePayer) {
+        ePayer.innerHTML = '<option value="">-- Chọn người ứng trước --</option>' + opts;
+        if (currentEPayer) ePayer.value = currentEPayer;
+      }
+      if (sPayer) {
+        sPayer.innerHTML = '<option value="">-- Chọn người bao --</option>' + opts;
+        if (currentSPayer) sPayer.value = currentSPayer;
+      }
+      renderParticipantChips(force);
+    }
+
+    function renderAll(force = false) {
+      if (currentTrip) {
+        const nameEl = document.getElementById('header-trip-name');
+        const metaEl = document.getElementById('header-trip-meta');
+        const stBadge = document.getElementById('badge-trip-status');
+        const ovBox = document.getElementById('trip-overview-box');
+        if (nameEl) nameEl.textContent = currentTrip.TenChuyenDi || 'Chuyến đi';
+        if (metaEl) metaEl.textContent = `${currentTrip.DiaDiem || ''} • ${formatDateVN(currentTrip.NgayBatDau)} - ${formatDateVN(currentTrip.NgayKetThuc)}`;
+        if (stBadge) stBadge.textContent = currentTrip.TrangThai || 'Đang đi';
+        if (ovBox) {
+          ovBox.innerHTML = `
+            <p><strong>Tên chuyến đi:</strong> ${currentTrip.TenChuyenDi}</p>
+            <p><strong>Địa điểm:</strong> ${currentTrip.DiaDiem || 'N/A'}</p>
+            <p><strong>Thời gian:</strong> ${formatDateVN(currentTrip.NgayBatDau)} - ${formatDateVN(currentTrip.NgayKetThuc)}</p>
+            <p><strong>Ngân sách dự kiến:</strong> ${formatVND(currentTrip.NganSachDuKien)}</p>
+          `;
+        }
+      }
+      renderMembers();
+      renderFunds();
+      renderExpenses();
+      renderStats();
+      updateDynamicSelects(force);
+      lucide.createIcons();
+    }
+
+    // --- POLLING & DATA SYNC ---
+    async function fetchTrips() {
+      const data = await apiCall('GET', null, 'action=getTrips');
+      if (data && data.trips) {
+        trips = data.trips;
+        renderWelcomeTrips();
+      }
+    }
+
+    async function fetchTripDetails() {
+      if (!currentTripId) return;
+      const data = await apiCall('GET', null, `tripId=${encodeURIComponent(currentTripId)}`);
+      if (data && !data.error) {
+        if (data.trip) currentTrip = data.trip;
+        if (data.members) members = data.members;
+        
+        // Merge thông minh Quỹ (Giữ lại khoản nạp vừa bấm lưu chưa kịp lên Google Sheets)
+        if (data.funds) {
+          const serverFunds = data.funds;
+          const serverSignatures = new Set(serverFunds.map(f => `${f.payer_name}_${f.amount}_${f.created_at}`));
+          const pendingFunds = funds.filter(f => f._isLocal && !serverSignatures.has(`${f.payer_name}_${f.amount}_${f.created_at}`));
+          funds = [...pendingFunds, ...serverFunds];
+        }
+
+        // Merge thông minh Chi tiêu (Giữ lại khoản chi vừa bấm lưu chưa kịp lên Google Sheets)
+        if (data.expenses) {
+          const serverExpenses = data.expenses;
+          const serverIds = new Set(serverExpenses.map(e => e.MaGiaoDich || (e.MoTa + '_' + e.SoTien + '_' + e.ThoiGianTao)));
+          const pendingExpenses = expenses.filter(e => e._isLocal && !serverIds.has(e.MaGiaoDich || (e.MoTa + '_' + e.SoTien + '_' + e.ThoiGianTao)));
+          expenses = [...pendingExpenses, ...serverExpenses];
+        }
+        renderAll();
+      }
+    }
+
+    function startPolling() {
+      if (pollingTimer) clearInterval(pollingTimer);
+      pollingTimer = setInterval(() => {
+        if (!isUserTyping && currentTripId) fetchTripDetails();
+      }, 4000);
+    }
+
+    // --- INIT ---
+    async function init() {
+      lucide.createIcons();
+      updateRoleUI();
+      await fetchTrips();
+      if (currentTripId) {
+        window.selectTrip(currentTripId);
+      } else {
+        renderWelcomeTrips();
+      }
+    }
+
+    init();
+  })();
+  </script>
+</body>
+</html>
